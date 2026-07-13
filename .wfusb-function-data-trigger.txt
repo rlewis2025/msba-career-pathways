@@ -1,0 +1,1 @@
+Trigger WFUSB function data update for MSBA Career Pathways index.
