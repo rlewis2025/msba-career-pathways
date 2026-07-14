@@ -18,4 +18,29 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Correct
+      - name: Remove extra MSBA key trend sentence
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('index.html')
+          html = path.read_text(encoding='utf-8')
+          sentence = 'Recorded outcome totals vary by year, from 47 in 2018 to 128 in 2022, but analytics remains the primary signal. '
+          if sentence in html:
+              html = html.replace(sentence, '', 1)
+              path.write_text(html, encoding='utf-8')
+              print('Removed extra MSBA key trend sentence from index.html')
+          else:
+              print('Sentence already absent from index.html')
+          PY
+
+      - name: Commit correction
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No index.html update needed."
+          else
+            git commit -m "Remove extra MSBA key trend sentence"
+            git push
+          fi
