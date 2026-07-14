@@ -1,0 +1,21 @@
+name: Update MSBA key trend text
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/update-msba-key-trend.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-key-trend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Correct MSBA key trend copy
