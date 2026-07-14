@@ -18,32 +18,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Correct MSBA key trend copy
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          path = Path('index.html')
-          html = path.read_text(encoding='utf-8')
-          old = """<span><strong>Key trend:</strong> <strong>Analytics is the dominant destination in every cohort</strong> — it never drops out of first place. Class sizes swing year to year (a large 2022 cohort of 128, a small 2023 cohort of 22), but the analytics share stays remarkably stable. <strong>Consulting</strong> and <strong>Finance</strong> are the consistent secondary destinations, both peaking in 2022. The takeaway: lead with analytics depth, then layer on a consulting or finance angle to widen your options.</span>"""
-          new = """<span><strong>Key trend:</strong> <strong>Analytics / Data Analytics remains the dominant MSBA function across the 2018–2025 function data</strong> and is the largest destination in every cohort. Recorded outcome totals vary by year, from 47 in 2018 to 128 in 2022, but analytics remains the primary signal. <strong>Consulting</strong> is the most consistent secondary destination and peaks in 2022; <strong>Finance</strong> is the next major secondary path and peaks in 2024. The takeaway: lead with analytics depth, then use consulting, finance, operations, or industry-specific evidence to widen your options.</span>"""
-          if old not in html and new not in html:
-              raise SystemExit('Expected key trend text was not found in index.html.')
-          if old in html:
-              html = html.replace(old, new, 1)
-              path.write_text(html, encoding='utf-8')
-              print('Updated MSBA key trend text in index.html')
-          else:
-              print('MSBA key trend text already updated')
-          PY
-
-      - name: Commit correction
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          if git diff --cached --quiet; then
-            echo "No index.html update needed."
-          else
-            git commit -m "Correct MSBA key trend text"
-            git push
-          fi
+      - name: Correct
