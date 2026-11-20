@@ -79,7 +79,7 @@
       explain: 'The median response for affected contacts is modeled lower by the chosen minutes. Number of contacts × median change is a rough exposure illustration, not measured total wait time.'
     },
     'flexport': {
-      pick: 0, label: 'Base shipment service', a: ['Ocean-standard shipments upgraded', 10, 200, 120, 10, 'shipments'],
+      pick: null, label: 'Upgrade route', a: ['Ocean-standard shipments upgraded', 10, 200, 120, 10, 'shipments'],
       b: ['Share of historical rate gap expected to hold', 10, 100, 60, 10, '%'],
       explain: 'Modeled late shipments prevented = upgraded shipments × (41% ocean-standard late − 23% priority late) × assumed realization share. Premium cost = upgrades × $650.'
     },
