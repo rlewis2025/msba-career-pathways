@@ -307,15 +307,21 @@
     originalHero.insertBefore(note, originalHero.querySelector('.actions') || null);
   }
 
+
+  // Optional, stage-specific coaching: guidance without revealing a solution or simulating credentials.
+  const coachTrigger = n => `<div class="ic-coach-cta"><button type="button" class="ic-coach-open" data-coach-step="${n}" aria-haspopup="dialog">Get an optional coaching prompt</button><span>Two levels of guidance · No answers given</span></div>`;
+
   const html = `
     <div class="ic-stage-nav" role="navigation" aria-label="Interactive case stages">
       <a href="#ic-brief">1 · Briefing</a><a href="#ic-data">2 · Data lab</a><a href="#ic-sim">3 · Decision lab</a><a href="#ic-pitch">4 · Pitch builder</a>
     </div>
-    <div class="ic-timer-strip"><div><b>Rapid-round practice</b><span>Use 5 minutes to prepare a 60–90-second pitch. Extend if your instructor allows.</span></div>
-      <div class="ic-timer-controls"><strong id="ic-timer" aria-live="polite">05:00</strong><button type="button" id="ic-timer-toggle">Start</button><button type="button" id="ic-timer-reset">Reset</button></div>
+    <div class="ic-timer-strip"><div><b>Rapid-round practice</b><span>10 minutes to prepare: 0–2 brief, 2–5 evidence, 5–8 decision, 8–10 pitch. Then present for 60–90 seconds.</span></div>
+      <div class="ic-timer-controls"><strong id="ic-timer" aria-live="polite">10:00</strong><button type="button" id="ic-timer-toggle">Start</button><button type="button" id="ic-timer-reset">Reset</button></div>
     </div>
+    <p id="ic-time-status" class="ic-timer-status" role="status" aria-live="polite">Start when your team is ready. The timer will not submit or lock any response.</p>
     <section class="ic-panel" id="ic-brief" aria-labelledby="ic-brief-title">
       <div class="ic-panel-heading"><div><span class="ic-kicker">STAGE 1 · THE BOARDROOM BRIEFING</span><h2 id="ic-brief-title">What must your team solve?</h2></div><span class="ic-counter">01 / 04</span></div>
+      ${coachTrigger(0)}
       <p class="ic-decision">${E(c.decision)}</p>
       <div class="ic-two-col"><div><h3>Stakeholder perspectives</h3>${c.voices.map(v=>`<blockquote class="ic-voice"><b>${E(v[0])}</b><span>“${E(v[1])}”</span></blockquote>`).join('')}</div>
       <div><h3>Constraints you cannot ignore</h3><ul class="ic-list">${c.limits.map(x=>`<li>${E(x)}</li>`).join('')}</ul></div></div>
@@ -323,6 +329,7 @@
     </section>
     <section class="ic-panel" id="ic-data" aria-labelledby="ic-data-title">
       <div class="ic-panel-heading"><div><span class="ic-kicker">STAGE 2 · EXPLORE THE EVIDENCE</span><h2 id="ic-data-title">Interactive data lab</h2></div><span class="ic-counter">02 / 04</span></div>
+      ${coachTrigger(1)}
       <p class="ic-lead">Switch datasets and KPIs to identify a pattern you can defend. Every number below comes from the fictional case exhibits.</p>
       <div class="ic-fields"><label for="ic-exhibit">Exhibit<select id="ic-exhibit"></select></label>
         <label for="ic-metric">Metric to visualize<select id="ic-metric"></select></label>
@@ -333,6 +340,7 @@
     </section>
     <section class="ic-panel" id="ic-sim" aria-labelledby="ic-sim-title">
       <div class="ic-panel-heading"><div><span class="ic-kicker">STAGE 3 · PUT A DECISION TO THE TEST</span><h2 id="ic-sim-title">${E(c.co)} decision simulator</h2></div><span class="ic-counter">03 / 04</span></div>
+      ${coachTrigger(2)}
       <p class="ic-lead">Choose a scenario and change two assumptions. Discuss whether the resulting option is feasible and what evidence is still missing.</p>
       <div class="ic-sim-grid"><div class="ic-sim-inputs">
         ${model.pick !== null ? `<label class="ic-choice-label" for="ic-choice">${E(model.label)}<select id="ic-choice"></select></label>` : '<p class="ic-weight-note">Scouting exercise: set the weights given to fictional player characteristics.</p>'}
@@ -346,6 +354,7 @@
     </section>
     <section class="ic-panel" id="ic-pitch" aria-labelledby="ic-pitch-title">
       <div class="ic-panel-heading"><div><span class="ic-kicker">STAGE 4 · TURN ANALYSIS INTO A HIRING PITCH</span><h2 id="ic-pitch-title">60–90 second Pitch Builder</h2></div><span class="ic-counter">04 / 04</span></div>
+      ${coachTrigger(3)}
       <p class="ic-lead">Write your own evidence-based response. Give an authentic example for <b>Proof of Capability</b>—the tool will not invent your experience.</p>
       <div class="ic-builder-grid">
         <div class="ic-pitch-inputs">
@@ -362,6 +371,13 @@
         </div>
       </div>
     </section>
+    <dialog class="ic-coach-dialog" id="ic-coach-dialog" aria-labelledby="ic-coach-title" aria-describedby="ic-coach-content">
+      <div class="ic-coach-dialog-head"><span class="ic-kicker" id="ic-coach-step-label">OPTIONAL THINKING GUIDE</span><button type="button" id="ic-coach-close" aria-label="Close coaching prompt">×</button></div>
+      <h2 id="ic-coach-title">One question to move your thinking forward</h2>
+      <p id="ic-coach-content"></p>
+      <p class="ic-coach-disclaimer">This is a thinking prompt, not the solution. Use your team's own analysis and actual experience.</p>
+      <div class="ic-coach-dialog-actions"><span id="ic-coach-progress">Prompt 1 of 2</span><button type="button" id="ic-coach-next">Show a second nudge</button></div>
+    </dialog>
   `;
 
   const stage = document.createElement('div');
@@ -369,6 +385,43 @@
   stage.innerHTML = html;
   host.appendChild(stage);
   host.appendChild(reference);
+
+  const coachPrompts = [
+    [
+      `For ${c.co}, which single business decision needs to be made? State it before naming SQL, Python or another tool.`,
+      `Compare the two stakeholder views (${c.voices[0][0]} and ${c.voices[1][0]}). Which constraint rules out a tempting but infeasible idea?`
+    ],
+    [
+      c.questions[0] || `Which group or metric most directly informs the decision for ${c.co}?`,
+      `Use both exhibits: "${c.tables[0][0]}" and "${c.tables[1][0]}". Check the denominator, timing and missing context before calling a difference a cause.`
+    ],
+    [
+      c.questions[1] || 'Which assumption most changes your recommendation?',
+      `Change one what-if assumption and explain what changes. Can your choice satisfy this guardrail: ${c.limits[0]}? Which result is assumed, not observed?`
+    ],
+    [
+      `As a ${c.role}, what REAL project, practicum or experience proves your team can do the proposed analysis? Do not invent accomplishments.`,
+      `Close with one recommendation, a measurable business KPI, a realistic test and a risk guardrail. Check your opening sentence: does it start with the employer's problem?`
+    ]
+  ];
+  const coachLabels=['BRIEFING','DATA LAB','DECISION LAB','PITCH BUILDER'];
+  const coachDialog=document.getElementById('ic-coach-dialog');
+  let coachStep=0,coachLevel=0,coachLauncher=null;
+  const showCoachText=()=>{
+    document.getElementById('ic-coach-step-label').textContent=`STAGE ${coachStep+1} · ${coachLabels[coachStep]} · OPTIONAL COACHING`;
+    document.getElementById('ic-coach-content').textContent=coachPrompts[coachStep][coachLevel];
+    document.getElementById('ic-coach-progress').textContent=`Prompt ${coachLevel+1} of 2`;
+    document.getElementById('ic-coach-next').hidden=coachLevel===1;
+  };
+  stage.querySelectorAll('.ic-coach-open').forEach(btn=>btn.addEventListener('click',()=>{
+    coachStep=Number(btn.dataset.coachStep);coachLevel=0;coachLauncher=btn;showCoachText();
+    if(coachDialog.showModal)coachDialog.showModal();else coachDialog.setAttribute('open','');
+  }));
+  document.getElementById('ic-coach-next').addEventListener('click',()=>{coachLevel=1;showCoachText();});
+  const closeCoach=()=>{if(coachDialog.close)coachDialog.close();else coachDialog.removeAttribute('open');};
+  document.getElementById('ic-coach-close').addEventListener('click',closeCoach);
+  coachDialog.addEventListener('close',()=>{if(coachLauncher)coachLauncher.focus();});
+  coachDialog.addEventListener('click',e=>{if(e.target===coachDialog)closeCoach();});
 
   let chartEvidence = '';
   let simEvidence = '';
@@ -492,18 +545,42 @@
     document.getElementById('ic-pitch-status').textContent='The outline was saved to your device. Nothing was submitted.';
   });
 
-  let seconds=300, timerRunning=false, timerId=null;
+  const TOTAL_SECONDS=600;
+  let seconds=TOTAL_SECONDS, timerRunning=false, timerId=null, endsAt=0;
   const timerDisplay=document.getElementById('ic-timer');
   const button=document.getElementById('ic-timer-toggle');
-  function paintClock(){timerDisplay.textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');timerDisplay.classList.toggle('ic-done',seconds===0);}
-  function stopClock(){if(timerId!==null)clearInterval(timerId);timerId=null;timerRunning=false;button.textContent=seconds===0?'Restart':'Start';}
+  const timeStatus=document.getElementById('ic-time-status');
+  function paintClock(){
+    timerDisplay.textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+    timerDisplay.classList.toggle('ic-done',seconds===0);
+  }
+  function stopClock(){
+    if(timerId!==null)clearInterval(timerId);
+    timerId=null;timerRunning=false;
+    button.textContent=seconds===0?'Restart':'Start';
+  }
+  function tickClock(){
+    if(!timerRunning)return;
+    seconds=Math.max(0,Math.ceil((endsAt-Date.now())/1000));
+    paintClock();
+    if(seconds===0){
+      stopClock();timeStatus.textContent='Preparation time is up. Choose your speaker and deliver your 60–90-second pitch; then answer one executive question.';
+    }
+  }
   button.addEventListener('click',()=>{
-    if(timerRunning){stopClock();return;}
-    if(seconds===0)seconds=300;
-    timerRunning=true;button.textContent='Pause';paintClock();
-    timerId=setInterval(()=>{seconds=Math.max(0,seconds-1);paintClock();if(seconds===0){stopClock();button.textContent='Restart';}},1000);
+    if(timerRunning){tickClock();stopClock();timeStatus.textContent='Timer paused. Resume when your team is ready.';return;}
+    if(seconds===0)seconds=TOTAL_SECONDS;
+    endsAt=Date.now()+seconds*1000;
+    timerRunning=true;button.textContent='Pause';
+    timeStatus.textContent='Countdown running · you can pause or reset it. Coaching prompts are optional.';
+    tickClock();
+    timerId=setInterval(tickClock,250);
   });
-  document.getElementById('ic-timer-reset').addEventListener('click',()=>{stopClock();seconds=300;paintClock();button.textContent='Start';});
+  document.addEventListener('visibilitychange',tickClock);
+  document.getElementById('ic-timer-reset').addEventListener('click',()=>{
+    stopClock();seconds=TOTAL_SECONDS;paintClock();button.textContent='Start';
+    timeStatus.textContent='10-minute preparation reset. Start when your team is ready.';
+  });
   paintClock();
   document.documentElement.classList.add('ic-enabled');
 })();
