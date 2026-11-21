@@ -367,7 +367,13 @@
         <div class="ic-pitch-preview"><div class="ic-preview-head"><b>Your pitch outline</b><span id="ic-wordcount">0 words</span></div><div id="ic-preview" class="ic-preview-content" aria-live="polite">Fill in the four fields to build your presentation.</div>
           <div class="ic-export"><button id="ic-copy-pitch" type="button">Copy outline</button><button id="ic-download-pitch" type="button">Save .txt</button></div>
           <p id="ic-pitch-status" class="ic-fine" role="status"></p>
-          <p class="ic-fine">Privacy: your entries remain in this browser tab. No account, tracking, form submission, or server-side student-response storage. Save or copy before closing this page.</p>
+          <div class="ic-submit-panel" aria-label="Team response submission">
+            <label class="ic-submit-label" for="ic-team-name">Team or group code <small>No student names, IDs or emails</small></label>
+            <input id="ic-team-name" type="text" maxlength="65" autocomplete="off" placeholder="e.g., Group 4 / Team Blue">
+            <button type="button" class="ic-submit-button" id="ic-submit-team">Submit team responses</button>
+            <p class="ic-submit-status" id="ic-submit-status" role="status">Submit your four completed responses to the instructor dashboard. The Google receipt opens in a new tab when activated.</p>
+          </div>
+          <p class="ic-fine">Privacy: the online exercise does not transmit or store your answers unless you choose <b>Submit team responses</b>. Save a local copy as a backup. The private instructor dashboard stores submitted group responses and timestamps.</p>
         </div>
       </div>
     </section>
@@ -543,6 +549,35 @@
     const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;
     document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
     document.getElementById('ic-pitch-status').textContent='The outline was saved to your device. Nothing was submitted.';
+  });
+
+  // Submissions are intentionally disabled until a WFU-owned Apps Script receiver is deployed.
+  // No credential or authentication token belongs in this public GitHub Pages site.
+  const submitButton=document.getElementById('ic-submit-team');
+  const submitStatus=document.getElementById('ic-submit-status');
+  const submitTeam=document.getElementById('ic-team-name');
+  submitButton.addEventListener('click',()=>{
+    const configured=String(window.WFUSB_MSBA_SUBMISSION_ENDPOINT||'').trim();
+    if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/i.test(configured)) {
+      submitStatus.textContent='Submission is not activated by your instructor yet. Use Save .txt to keep a copy of your pitch; do not assume it has been submitted.';
+      return;
+    }
+    const team=submitTeam.value.trim();
+    if(team.length<2){submitStatus.textContent='Enter a team/group code (at least two characters), without student names or IDs.';submitTeam.focus();return;}
+    if(team.length>65){submitStatus.textContent='Group code is too long (maximum 65 characters).';submitTeam.focus();return;}
+    if(fields.some(f=>f.value.trim().length<5)){
+      submitStatus.textContent='Complete all four response sections (Business Problem, Analytical Plan, Proof of Capability, Business Value) before submitting.';
+      const firstEmpty=fields.find(f=>f.value.trim().length<5);firstEmpty?.focus();return;
+    }
+    // The browser's ordinary form POST opens the receiver's confirmation page in a new tab.
+    // The receiver creates a confirmed receipt only AFTER a successful sheet append.
+    // This avoids reporting success for an opaque cross-origin fetch response.
+    const body={caseId:c.id,team,problem:fields[0].value.trim(),plan:fields[1].value.trim(),proof:fields[2].value.trim(),value:fields[3].value.trim(),timerRemaining:typeof seconds==='number'?seconds:600};
+    const form=document.createElement('form');
+    form.method='POST';form.action=configured;form.target='_blank';form.style.display='none';
+    const payload=document.createElement('input');payload.type='hidden';payload.name='payload';payload.value=JSON.stringify(body);
+    form.appendChild(payload);document.body.appendChild(form);form.submit();form.remove();
+    submitStatus.textContent='A Google confirmation page should open in a new tab. Your response is not confirmed until you see a receipt with a confirmation number. Keep this page open and use Save .txt as a backup if needed.';
   });
 
   const TOTAL_SECONDS=600;
