@@ -558,7 +558,7 @@
   const submitTeam=document.getElementById('ic-team-name');
   submitButton.addEventListener('click',()=>{
     const configured=String(window.WFUSB_MSBA_SUBMISSION_ENDPOINT||'').trim();
-    if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/i.test(configured)) {
+    if (!/^https:\/\/script\.google\.com\/(?:a\/macros\/[A-Za-z0-9.-]+\/s\/|macros\/s\/)[A-Za-z0-9_-]+\/exec(?:\?.*)?$/i.test(configured)) {
       submitStatus.textContent='Submission is not activated by your instructor yet. Use Save .txt to keep a copy of your pitch; do not assume it has been submitted.';
       return;
     }
