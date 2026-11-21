@@ -32,3 +32,13 @@ html{scroll-behavior:smooth}.ic-enabled .hero{margin-bottom:14px}.ic-hero-note{m
 .ic-coach-dialog-actions button[hidden]{display:none}
 @media(max-width:450px){.ic-coach-dialog{padding:17px}.ic-coach-dialog h2{font-size:21px}.ic-coach-cta>span{display:block;font-size:11px}}
 @media print{.ic-coach-cta,.ic-coach-dialog,.ic-timer-status{display:none!important}}
+
+/* WFU MSBA group submission controls */
+.ic-submit-panel{border:1px solid #d8c79e;background:#fffaf0;border-radius:12px;padding:16px;margin-top:16px;display:grid;gap:10px}
+.ic-submit-label{font-size:14px;font-weight:700;color:#263b50;display:grid;gap:3px}
+.ic-submit-label small{font-weight:400;color:#6b7480;font-size:12px}
+#ic-team-name{width:100%;font:inherit;padding:12px 13px;border-radius:8px;border:1px solid #b9bdc4;background:#fff;min-height:44px;color:#172a40}
+.ic-submit-button{background:#8e712e;color:white;border:0;border-radius:9px;padding:13px 17px;font-weight:800;font-size:15px;cursor:pointer;min-height:44px}
+.ic-submit-button:hover,.ic-submit-button:focus-visible{background:#715824;outline:2px solid #e0c782;outline-offset:2px}
+.ic-submit-status{font-size:12px;line-height:1.5;color:#465769;margin:0!important}
+@media print{.ic-submit-panel{display:none}}
