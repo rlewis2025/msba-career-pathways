@@ -1,4 +1,4 @@
-/* WFUSB MSBA Shark Tank interactive enhancement, v1.0.
+/* WFUSB Technical-Case Interview Challenge interactive enhancement, v1.0.
    All scenarios, datasets, and stakeholder remarks are synthetic classroom material.
    No analytics, tracking, servers, or student-response storage. */
 (function () {
@@ -522,7 +522,7 @@
   const ids=['problem','plan','proof','value'];
   const labels=['Business Problem','Analytical Plan','Proof of Capability','Business Value'];
   const fields=ids.map(id=>document.getElementById('ic-field-'+id));
-  const initialText=()=>`${c.co} — MSBA Shark Tank Hiring Pitch\nIllustrative role: ${c.role}\n\n`+fields.map((field,i)=>`${labels[i]}:\n${field.value.trim()||'[Your team has not completed this section]'}\n`).join('\n')+'\nClassroom practice only — all case data synthetic.\n';
+  const initialText=()=>`${c.co} — Technical-Case Interview Challenge Hiring Pitch\nIllustrative role: ${c.role}\n\n`+fields.map((field,i)=>`${labels[i]}:\n${field.value.trim()||'[Your team has not completed this section]'}\n`).join('\n')+'\nClassroom practice only — all case data synthetic.\n';
   function renderPitch() {
     const txt=initialText();
     document.getElementById('ic-preview').textContent=txt;
